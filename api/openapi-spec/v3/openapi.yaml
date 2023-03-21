@@ -1,0 +1,180 @@
+openapi: 3.1.0
+info:
+  version: 0.0.1
+  title: Household Account Book API
+  description: Household Account Book API specification
+  contact:
+    name: Katsuharu
+    url: https://github.com/katsuharu/household-account-book
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+paths:
+  /expenses:
+    post:
+      description: Creates a new expense. Names must be unique.
+      operationId: createExpense
+      tags:
+        - expenses
+      requestBody:
+        description: expense to create.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqBodyExpense'
+      responses:
+        201:
+          description: Expense created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Expense'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      description: Update a expense. Names must be unique.
+      operationId: updateExpense
+      tags:
+        - expenses
+      requestBody:
+        description: expense to update.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqBodyExpense'
+      responses:
+        200:
+          description: Expense created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Expense'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /payments:
+    post:
+      description: Create a payment.
+      operationId: createdPayment
+      tags:
+        - payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                expense_id:
+                  type: string
+                  description: expense id.
+                name:
+                  type: string
+                  description: name of payment.
+                amount:
+                  type: integer
+                  description: amount of payment.
+              required:
+                - expense_id
+                - name
+                - amount
+      responses:
+        200:
+          description: Payment created.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                required:
+                  - id
+
+    get:
+      description: Returns total monthly payment for each expense.
+      tags:
+        - payments
+      responses:
+        200:
+          description: get
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  amount:
+                    type: integer
+
+  /payments/{expense_id}:
+    get:
+      description: Returns total monthly payment for each expense.
+      tags:
+        - payments
+      parameters:
+        - name: expense_id
+          in: path
+          description: Expense id to c
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: total monthly payment response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  amount:
+                    type: integer
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    ReqBodyExpense:
+      type: object
+      required:
+        - name  
+      properties:
+        name:
+          type: string
+
+    Expense:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+        - name
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
